@@ -13,18 +13,25 @@ app.use(cors(corsOptions)); // Enable CORS for the specified origin½
 app.use(express.json()); // Enable JSON parsing middleware
 
 /** ROUTES */
-app.get('/cars', (req, res) => { 
+app.get('/cars', (req, res) => {
     res.send(eCarsTop25_2022);
 });
 
 app.post('/car', (req, res) => {
-    // Add car to the list
-    res.send('Car added to the list: ' + JSON.stringify(req.body));
-    
-    // Sort eCarsTop25_2022 by quantity and rank them accordingly
-    addCar(req.body);
+    responseMessage = JSON.stringify({
+        message: 'Car couldn\'t be added: Unknown error.'
+    });
 
+    try {
+        responseMessage = addCar(req.body);
+    }
+    catch (e) {
+        responseMessage = JSON.stringify({
+            message: e.message
+        });
+    }
     res.status(201);
+    res.send(JSON.stringify(responseMessage));
 });
 
 app.listen(port, () => {
@@ -58,12 +65,38 @@ const eCarsTop25_2022 = [
     { rank: 23, model: 'Audi E-tron', quantity: 168, changeQuantityPercent: 25 },
     { rank: 24, model: 'Dacia Spring', quantity: 160, changeQuantityPercent: 5233 },
     { rank: 25, model: 'BMW i4', quantity: 142, changeQuantityPercent: 100 },
-  ];
+];
 
-  function addCar(car) {
+function addCar(car) {
+    // Pretend we're logging to a file instead of just console...
     console.log(car);
-    eCarsTop25_2022.push(car);
+
+    // Add the car to the list
+    if (validateCar(car)) {
+        eCarsTop25_2022.push(car);
+    }
+    else {
+        console.log('Invalid car: ' + JSON.stringify(car, null, 2));
+        throw new Error('Invalid car');
+    }
+
+    // Sort eCarsTop25_2022 by quantity and rank them accordingly
     eCarsTop25_2022.sort((a, b) => b.quantity - a.quantity);
     eCarsTop25_2022.forEach((car, index) => car.rank = index + 1);
+    
+    // Pretend we're logging to a log file instead of just console...
     console.log(JSON.stringify(eCarsTop25_2022, null, 2));
-  }
+
+    return eCarsTop25_2022.find(c =>
+        c.model == car.model &&
+        c.quantity == car.quantity &&
+        c.changeQuantityPercent == car.changeQuantityPercent
+    );
+}
+
+function validateCar(car) {
+    if (car.model && car.model.length >= 3 && !isNaN(car.quantity) && !isNaN(car.changeQuantityPercent)) {
+        return true;
+    }
+    return false;
+}
