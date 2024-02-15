@@ -1,15 +1,21 @@
 const express = require('express');
 const cors = require('cors'); // Import the cors module
-const e = require('express');
 
 /** SETUP */
 const app = express();
 const port = 3000;
 
-app.use(cors()); // Enable CORS for the specified origin½
+// Set CORS option to allow localhost
+const corsOptions = {
+    origin: '*'
+};
+
+app.use(cors({origin: '*'})); // Enable CORS for the specified origin
 app.use(express.json()); // Enable JSON parsing middleware
 
 /** ROUTES */
+
+// Cars route
 app.get('/cars', (req, res) => {
     res.send(eCarsTop25_2022);
 });
@@ -33,7 +39,7 @@ app.get('/cars/:type', (req, res) => {
         // Sort cars
         cars = sortCarsFromArray(cars);
     }
-    
+
     res.send(cars);
 });
 
@@ -89,33 +95,56 @@ app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
+// Users route
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    console.log(req.body);
+    
+    const user = login(username, password);
+    if (user) {
+        res.status(200);
+        res.send(JSON.stringify({
+            isAuthenticated: true,
+            role: user.role
+        }));
+    }
+    else {
+        res.status(401);
+        res.send(JSON.stringify({
+            isAuthenticated: false,
+            message: 'Invalid credentials.'
+        }));
+    }
+});
+
 /** DATA */
 const eCarsTop25_2022 = [
-    { id: 1,  type:"electric", model: 'Skoda Enyaq', quantity: 1044, changeQuantityPercent: 284 },
-    { id: 2,  type:"electric", model: 'Tesla Model Y', quantity: 989, changeQuantityPercent: 100 },
-    { id: 3,  type:"electric", model: 'Polestar 2', quantity: 836, changeQuantityPercent: 1990 },
-    { id: 4,  type:"electric", model: 'Audi Q4', quantity: 816, changeQuantityPercent: 586 },
-    { id: 5,  type:"electric", model: 'Ford Mustang Mach-E', quantity: 659, changeQuantityPercent: 1333 },
-    { id: 6,  type:"electric", model: 'Kia EV6', quantity: 520, changeQuantityPercent: 100 },
-    { id: 7,  type:"electric", model: 'VW ID.4', quantity: 458, changeQuantityPercent: -61 },
-    { id: 8,  type:"electric", model: 'Volvo XC40', quantity: 416, changeQuantityPercent: 100 },
-    { id: 9,  type:"electric", model: 'Hyundai Ioniq 5', quantity: 365, changeQuantityPercent: 100 },
-    { id: 10, type:"electric", model: 'Hyundai Kona', quantity: 359, changeQuantityPercent: -24 },
-    { id: 11, type:"electric", model: 'Tesla Model 3', quantity: 350, changeQuantityPercent: -68 },
-    { id: 12, type:"electric", model: 'Kia Niro', quantity: 346, changeQuantityPercent: -16 },
-    { id: 13, type:"electric", model: 'Peugeot 208', quantity: 330, changeQuantityPercent: 131 },
-    { id: 14, type:"electric", model: 'VW ID.3', quantity: 329, changeQuantityPercent: -54 },
-    { id: 15, type:"electric", model: 'Cupra Born', quantity: 298, changeQuantityPercent: 100 },
-    { id: 16, type:"electric", model: 'Mercedes-Benz EQA', quantity: 289, changeQuantityPercent: 51 },
-    { id: 17, type:"electric", model: 'VW Up', quantity: 229, changeQuantityPercent: 332 },
-    { id: 18, type:"electric", model: 'VW ID.5', quantity: 226, changeQuantityPercent: 100 },
-    { id: 19, type:"electric", model: 'Mercedes-Benz EQB', quantity: 224, changeQuantityPercent: 100 },
-    { id: 20, type:"electric", model: 'Fiat 500', quantity: 202, changeQuantityPercent: -40 },
-    { id: 21, type:"electric", model: 'Renault Zoe', quantity: 185, changeQuantityPercent: -18 },
-    { id: 22, type:"electric", model: 'Peugeot 2008', quantity: 169, changeQuantityPercent: 42 },
-    { id: 23, type:"electric", model: 'Audi E-tron', quantity: 168, changeQuantityPercent: 25 },
-    { id: 24, type:"electric", model: 'Dacia Spring', quantity: 160, changeQuantityPercent: 5233 },
-    { id: 25, type:"electric", model: 'BMW i4', quantity: 142, changeQuantityPercent: 100 },
+    { id: 1, type: "electric", model: 'Skoda Enyaq', quantity: 1044, changeQuantityPercent: 284 },
+    { id: 2, type: "electric", model: 'Tesla Model Y', quantity: 989, changeQuantityPercent: 100 },
+    { id: 3, type: "electric", model: 'Polestar 2', quantity: 836, changeQuantityPercent: 1990 },
+    { id: 4, type: "electric", model: 'Audi Q4', quantity: 816, changeQuantityPercent: 586 },
+    { id: 5, type: "electric", model: 'Ford Mustang Mach-E', quantity: 659, changeQuantityPercent: 1333 },
+    { id: 6, type: "electric", model: 'Kia EV6', quantity: 520, changeQuantityPercent: 100 },
+    { id: 7, type: "electric", model: 'VW ID.4', quantity: 458, changeQuantityPercent: -61 },
+    { id: 8, type: "electric", model: 'Volvo XC40', quantity: 416, changeQuantityPercent: 100 },
+    { id: 9, type: "electric", model: 'Hyundai Ioniq 5', quantity: 365, changeQuantityPercent: 100 },
+    { id: 10, type: "electric", model: 'Hyundai Kona', quantity: 359, changeQuantityPercent: -24 },
+    { id: 11, type: "electric", model: 'Tesla Model 3', quantity: 350, changeQuantityPercent: -68 },
+    { id: 12, type: "electric", model: 'Kia Niro', quantity: 346, changeQuantityPercent: -16 },
+    { id: 13, type: "electric", model: 'Peugeot 208', quantity: 330, changeQuantityPercent: 131 },
+    { id: 14, type: "electric", model: 'VW ID.3', quantity: 329, changeQuantityPercent: -54 },
+    { id: 15, type: "electric", model: 'Cupra Born', quantity: 298, changeQuantityPercent: 100 },
+    { id: 16, type: "electric", model: 'Mercedes-Benz EQA', quantity: 289, changeQuantityPercent: 51 },
+    { id: 17, type: "electric", model: 'VW Up', quantity: 229, changeQuantityPercent: 332 },
+    { id: 18, type: "electric", model: 'VW ID.5', quantity: 226, changeQuantityPercent: 100 },
+    { id: 19, type: "electric", model: 'Mercedes-Benz EQB', quantity: 224, changeQuantityPercent: 100 },
+    { id: 20, type: "electric", model: 'Fiat 500', quantity: 202, changeQuantityPercent: -40 },
+    { id: 21, type: "electric", model: 'Renault Zoe', quantity: 185, changeQuantityPercent: -18 },
+    { id: 22, type: "electric", model: 'Peugeot 2008', quantity: 169, changeQuantityPercent: 42 },
+    { id: 23, type: "electric", model: 'Audi E-tron', quantity: 168, changeQuantityPercent: 25 },
+    { id: 24, type: "electric", model: 'Dacia Spring', quantity: 160, changeQuantityPercent: 5233 },
+    { id: 25, type: "electric", model: 'BMW i4', quantity: 142, changeQuantityPercent: 100 },
     { id: 26, type: "fossil", model: 'Toyota Camry', quantity: 100, changeQuantityPercent: 0 },
     { id: 27, type: "fossil", model: 'Honda Civic', quantity: 150, changeQuantityPercent: 10 },
     { id: 28, type: "fossil", model: 'Ford Mustang', quantity: 50, changeQuantityPercent: -5 },
@@ -220,10 +249,20 @@ function sortCarsFromArray(carArray) {
 
 function validateCar(car) {
     return (
-        car.model && 
-        car.model.length >= 3 && 
-        !isNaN(car.quantity) && 
+        car.model &&
+        car.model.length >= 3 &&
+        !isNaN(car.quantity) &&
         !isNaN(car.changeQuantityPercent));
 }
 
+const users = [
+    { username: 'admin', password: '<PASSWORD>', role: 'admin' },
+    { username: 'user', password: '<PASSWORD>', role: 'user' },
+]
+
+function login(username, password) {
+    return users.find(u => u.username == username && u.password == password);
+}
+
+/** INITIALIZE */
 sortCars();
